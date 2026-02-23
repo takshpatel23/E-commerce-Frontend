@@ -30,28 +30,39 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
+        setLoading(true);
         const headers = { Authorization: `Bearer ${token}` };
+        
+        // FIXED: Using backticks (`) instead of double quotes (") for URLs
         const [prodRes, userRes, orderRes] = await Promise.all([
-          axios.get("${import.meta.env.VITE_API_URL}/api/products", { headers }),
-          axios.get("${import.meta.env.VITE_API_URL}/api/users/data", { headers }),
-          axios.get("${import.meta.env.VITE_API_URL}/api/orders", { headers })
+          axios.get(`${import.meta.env.VITE_API_URL}/api/products`, { headers }),
+          axios.get(`${import.meta.env.VITE_API_URL}/api/users/data`, { headers }),
+          axios.get(`${import.meta.env.VITE_API_URL}/api/orders`, { headers })
         ]);
-        setProducts(prodRes.data);
-        setUsers(userRes.data);
-        setOrders(orderRes.data);
+
+        // DATA DEFENSE: Ensure we always extract the array from the response
+        const prodData = Array.isArray(prodRes.data) ? prodRes.data : (prodRes.data.products || prodRes.data.data || []);
+        const userData = Array.isArray(userRes.data) ? userRes.data : (userRes.data.users || userRes.data.data || []);
+        const orderData = Array.isArray(orderRes.data) ? orderRes.data : (orderRes.data.orders || orderRes.data.data || []);
+
+        setProducts(prodData);
+        setUsers(userData);
+        setOrders(orderData);
         setLoading(false);
       } catch (err) {
-        console.error("Fetch Error:", err);
+        console.error("Dashboard Sync Error:", err);
         setLoading(false);
       }
     };
-    fetchDashboardData();
+    if (token) fetchDashboardData();
   }, [token]);
 
-  // --- REVENUE LOGIC ---
-  const successfulOrders = orders.filter(o => o.status !== "Cancelled");
-  const cancelledOrders = orders.filter(o => o.status === "Cancelled");
-  const pendingOrders = orders.filter(o => o.status === "Pending");
+  // --- REVENUE LOGIC (With Safety Checks) ---
+  const safeOrders = Array.isArray(orders) ? orders : [];
+  
+  const successfulOrders = safeOrders.filter(o => o.status !== "Cancelled");
+  const cancelledOrders = safeOrders.filter(o => o.status === "Cancelled");
+  const pendingOrders = safeOrders.filter(o => o.status === "Pending" || o.status === "pending");
 
   const totalRevenue = successfulOrders.reduce((acc, order) => acc + (order.total || 0), 0);
   const cancelledAmount = cancelledOrders.reduce((acc, order) => acc + (order.total || 0), 0);
@@ -60,7 +71,7 @@ const Dashboard = () => {
   const todayOrders = successfulOrders.filter(o => o.createdAt?.startsWith(today));
   const todayRevenue = todayOrders.reduce((acc, order) => acc + (order.total || 0), 0);
   const dailyOrdersCount = todayOrders.length;
-  const progressPercentage = Math.min(Math.round((todayRevenue / dailyGoal) * 100), 100);
+  const progressPercentage = dailyGoal > 0 ? Math.min(Math.round((todayRevenue / dailyGoal) * 100), 100) : 0;
 
   const handleSetGoal = () => {
     setDailyGoal(Number(tempGoal));
@@ -70,19 +81,25 @@ const Dashboard = () => {
 
   const twoDaysAgo = new Date();
   twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
-  const recentTransactionsAll = orders
+  
+  const recentTransactionsAll = safeOrders
     .filter(order => new Date(order.createdAt) >= twoDaysAgo)
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   const filteredTransactions = recentTransactionsAll.filter(order => 
     order.userName?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    order._id.toLowerCase().includes(searchTerm.toLowerCase())
+    order._id?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (loading) return <div className="h-screen flex items-center justify-center font-bold text-slate-400">LOADING CORE...</div>;
+  if (loading) return (
+    <div className="h-[80vh] flex flex-col items-center justify-center gap-4">
+      <div className="w-12 h-12 border-4 border-slate-200 border-t-indigo-600 rounded-full animate-spin"></div>
+      <p className="font-black text-slate-400 text-[10px] uppercase tracking-[0.3em]">Syncing Neural Link...</p>
+    </div>
+  );
 
   return (
-    <div className="w-full space-y-10 p-4">
+    <div className="w-full space-y-10 p-4 animate-in fade-in duration-700">
       {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 text-left">
         <div>
@@ -105,26 +122,11 @@ const Dashboard = () => {
         <StatCard title="Net Revenue" value={`₹${totalRevenue.toLocaleString()}`} change="Verified" icon={<TrendingUp size={22}/>} color="bg-emerald-500" />
       </div>
 
-      {/* SECONDARY TRACKING (PENDING & CANCELLED) */}
+      {/* SECONDARY TRACKING */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <MiniStatCard 
-            label="Pending Queue" 
-            value={pendingOrders.length} 
-            icon={<Clock size={18} />} 
-            color="text-amber-600 bg-amber-50" 
-        />
-        <MiniStatCard 
-            label="Cancelled Orders" 
-            value={cancelledOrders.length} 
-            icon={<XCircle size={18} />} 
-            color="text-rose-600 bg-rose-50" 
-        />
-        <MiniStatCard 
-            label="Lost Revenue" 
-            value={`₹${cancelledAmount.toLocaleString()}`} 
-            icon={<AlertCircle size={18} />} 
-            color="text-slate-400 bg-slate-50" 
-        />
+        <MiniStatCard label="Pending Queue" value={pendingOrders.length} icon={<Clock size={18} />} color="text-amber-600 bg-amber-50" />
+        <MiniStatCard label="Cancelled Orders" value={cancelledOrders.length} icon={<XCircle size={18} />} color="text-rose-600 bg-rose-50" />
+        <MiniStatCard label="Lost Revenue" value={`₹${cancelledAmount.toLocaleString()}`} icon={<AlertCircle size={18} />} color="text-slate-400 bg-slate-50" />
       </div>
 
       {/* MAIN GRID */}
@@ -139,9 +141,13 @@ const Dashboard = () => {
           <div className="overflow-x-auto flex-grow">
             <table className="w-full text-left">
               <tbody className="divide-y divide-slate-50">
-                {recentTransactionsAll.slice(0, 6).map((order) => (
-                  <OrderRow key={order._id} order={order} />
-                ))}
+                {recentTransactionsAll.length > 0 ? (
+                  recentTransactionsAll.slice(0, 6).map((order) => (
+                    <OrderRow key={order._id} order={order} />
+                  ))
+                ) : (
+                  <tr><td className="p-10 text-center text-slate-400 font-bold italic">No recent activity detected.</td></tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -190,7 +196,7 @@ const Dashboard = () => {
               </div>
               <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-[0.15em]">
                 <span className="bg-white/10 px-3 py-1 rounded-full">{progressPercentage}% Complete</span>
-                {progressPercentage < 100 && <span className="text-white/40 italic">Gap: ₹{(dailyGoal - todayRevenue).toLocaleString()}</span>}
+                {progressPercentage < 100 && <span className="text-white/40 italic">Gap: ₹{Math.max(0, dailyGoal - todayRevenue).toLocaleString()}</span>}
               </div>
             </div>
           </div>
@@ -232,17 +238,17 @@ const Dashboard = () => {
               {filteredTransactions.map((order) => (
                 <div key={order._id} className="p-6 bg-white border border-slate-100 rounded-[2rem] flex justify-between items-center hover:shadow-lg transition-shadow">
                   <div className="flex items-center gap-5">
-                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg ${order.status === 'Completed' ? 'bg-emerald-500 shadow-emerald-100' : order.status === 'Cancelled' ? 'bg-rose-500 shadow-rose-100' : 'bg-amber-500 shadow-amber-100'}`}>
+                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg ${order.status?.toLowerCase() === 'completed' ? 'bg-emerald-500 shadow-emerald-100' : order.status?.toLowerCase() === 'cancelled' ? 'bg-rose-500 shadow-rose-100' : 'bg-amber-500 shadow-amber-100'}`}>
                         <ShoppingCart size={22} />
                     </div>
                     <div className="text-left">
                       <p className="text-sm font-black text-slate-900 uppercase tracking-tight">{order.userName}</p>
-                      <p className="text-[10px] text-slate-400 font-bold tracking-widest mt-0.5">#{order._id.slice(-8).toUpperCase()}</p>
+                      <p className="text-[10px] text-slate-400 font-bold tracking-widest mt-0.5">#{order._id?.slice(-8).toUpperCase()}</p>
                     </div>
                   </div>
                   <div className="text-right">
                     <p className="text-xl font-black text-slate-900 tracking-tighter italic">₹{order.total?.toLocaleString()}</p>
-                    <span className={`text-[9px] font-black uppercase tracking-widest ${order.status === 'Completed' ? 'text-emerald-500' : order.status === 'Cancelled' ? 'text-rose-500' : 'text-amber-500'}`}>
+                    <span className={`text-[9px] font-black uppercase tracking-widest ${order.status?.toLowerCase() === 'completed' ? 'text-emerald-500' : order.status?.toLowerCase() === 'cancelled' ? 'text-rose-500' : 'text-amber-500'}`}>
                         {order.status}
                     </span>
                   </div>
@@ -257,7 +263,6 @@ const Dashboard = () => {
 };
 
 /* --- HELPER COMPONENTS --- */
-
 const StatCard = ({ title, value, change, icon, color }) => (
   <div className="bg-white p-7 rounded-[2.5rem] border border-slate-100 shadow-xl text-left hover:scale-[1.02] transition-all duration-500">
     <div className="flex justify-between items-start mb-6">
@@ -285,13 +290,13 @@ const MiniStatCard = ({ label, value, icon, color }) => (
 
 const OrderRow = ({ order }) => (
   <tr className="hover:bg-slate-50/50 transition-colors">
-    <td className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">#{order._id.slice(-6)}</td>
+    <td className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">#{order._id?.slice(-6)}</td>
     <td className="px-8 py-6 text-sm text-slate-900 font-bold uppercase tracking-tight">{order.userName}</td>
     <td className="px-8 py-6 font-black text-lg italic tracking-tighter text-slate-900">₹{order.total?.toLocaleString()}</td>
     <td className="px-8 py-6 text-right">
        <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${
-           order.status === 'Completed' ? 'text-emerald-500 border-emerald-50 bg-emerald-50/30' : 
-           order.status === 'Cancelled' ? 'text-rose-500 border-rose-50 bg-rose-50/30' : 
+           order.status?.toLowerCase() === 'completed' ? 'text-emerald-500 border-emerald-50 bg-emerald-50/30' : 
+           order.status?.toLowerCase() === 'cancelled' ? 'text-rose-500 border-rose-50 bg-rose-50/30' : 
            'text-amber-500 border-amber-50 bg-amber-50/30'
        }`}>
            {order.status}
