@@ -34,7 +34,7 @@ const Product = () => {
     const fetchCategories = async () => {
       try {
         const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/categories`);
-        setCategories(res.data); // structured parent -> subCategories
+        setCategories(Array.isArray(res.data) ? res.data : []); // structured parent -> subCategories
       } catch (err) {
         console.log("Error fetching categories:", err);
       }
