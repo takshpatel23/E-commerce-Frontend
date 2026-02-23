@@ -124,16 +124,19 @@ const ViewUsers = () => {
               </button>
 
               <div className="w-40 h-40 rounded-3xl overflow-hidden border-4 border-slate-800 shadow-2xl mb-6 ring-4 ring-amber-500/20">
-                <img
-                  src={
-                    modalUser.profileImage
-                      ? `${import.meta.env.VITE_API_URL}${modalUser.profileImage}`
-                      : "https://via.placeholder.com/300"
-                  }
-                  alt={modalUser.name}
-                  className="w-full h-full object-cover"
-                  onError={(e) => { e.target.src = "https://via.placeholder.com/300"; }}
-                />
+<img
+  src={
+    preview || 
+    (userData.profileImage 
+      ? (userData.profileImage.startsWith('http') 
+          ? userData.profileImage 
+          : `${import.meta.env.VITE_API_URL}${userData.profileImage}`)
+      : "https://via.placeholder.com/150")
+  }
+  className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+  alt="Member Portrait"
+  onError={(e) => { e.target.src = "https://via.placeholder.com/150"; }}
+/>
               </div>
               <h2 className="text-2xl font-bold text-white mb-1">{modalUser.name}</h2>
               <span className="px-3 py-1 bg-amber-500/10 text-amber-500 rounded-full text-xs font-bold uppercase tracking-widest border border-amber-500/20">

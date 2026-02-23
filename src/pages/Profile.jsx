@@ -125,11 +125,19 @@ const Profile = () => {
             <div className="relative group">
               {/* PORTRAIT UPLOAD */}
               <div className="w-44 h-44 rounded-[4rem] overflow-hidden bg-slate-100 border-4 border-white shadow-[0_30px_60px_-15px_rgba(0,0,0,0.2)] relative z-10">
-                <img
-                  src={preview || (userData.profileImage ? `${import.meta.env.VITE_API_URL}${userData.profileImage}` : "https://via.placeholder.com/150")}
-                  className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-                  alt="Member Portrait"
-                />
+<img
+  src={
+    preview || 
+    (userData.profileImage 
+      ? (userData.profileImage.startsWith('http') 
+          ? userData.profileImage 
+          : `${import.meta.env.VITE_API_URL}${userData.profileImage}`)
+      : "https://via.placeholder.com/150")
+  }
+  className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+  alt="Member Portrait"
+  onError={(e) => { e.target.src = "https://via.placeholder.com/150"; }}
+/>
                 <label htmlFor="portrait-upload" className="absolute inset-0 bg-slate-950/40 backdrop-blur-md flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 cursor-pointer">
                   <Camera className="text-white mb-2" size={28} />
                   <span className="text-[8px] font-black text-white uppercase tracking-[0.3em]">Update Portrait</span>
