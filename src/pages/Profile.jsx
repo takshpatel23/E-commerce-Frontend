@@ -131,12 +131,13 @@ const Profile = () => {
     (userData.profileImage 
       ? (userData.profileImage.startsWith('http') 
           ? userData.profileImage 
-          : `${import.meta.env.VITE_API_URL}${userData.profileImage}`)
-      : "https://via.placeholder.com/150")
+          : `${import.meta.env.VITE_API_URL}${userData.profileImage}`) // Fixed path
+      : "https://ui-avatars.com/api/?name=User&background=f1f5f9&color=cbd5e1") // Added fallback
   }
   className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
   alt="Member Portrait"
-  onError={(e) => { e.target.src = "https://via.placeholder.com/150"; }}
+  // This ensures that if the URL is valid but the image file is missing, it still doesn't crash
+  onError={(e) => { e.target.src = "https://ui-avatars.com/api/?name=User&background=f1f5f9&color=cbd5e1"; }}
 />
                 <label htmlFor="portrait-upload" className="absolute inset-0 bg-slate-950/40 backdrop-blur-md flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 cursor-pointer">
                   <Camera className="text-white mb-2" size={28} />
