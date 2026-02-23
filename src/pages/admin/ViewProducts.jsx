@@ -9,7 +9,7 @@ const ViewProducts = () => {
   const navigate = useNavigate();
   
   const [products, setProducts] = useState([]);
-  const [allCategories, setAllCategories] = useState([]); // Nested structure from API
+  const [allCategories, setAllCategories] = useState([]); 
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [modalProduct, setModalProduct] = useState(null);
@@ -20,15 +20,28 @@ const ViewProducts = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
+      // FIXED: Used backticks (`) instead of double quotes (") for URLs
       const [prodRes, catRes] = await Promise.all([
-        axios.get("${import.meta.env.VITE_API_URL}/api/products"),
-        axios.get("${import.meta.env.VITE_API_URL}/api/categories")
+        axios.get(`${import.meta.env.VITE_API_URL}/api/products`),
+        axios.get(`${import.meta.env.VITE_API_URL}/api/categories`)
       ]);
-      setProducts(prodRes.data);
-      setFilteredProducts(prodRes.data);
-      setAllCategories(catRes.data);
+
+      // SAFETY CHECK: Ensure we extract the array correctly
+      const productData = Array.isArray(prodRes.data) 
+        ? prodRes.data 
+        : (prodRes.data.products || prodRes.data.data || []);
+        
+      const categoryData = Array.isArray(catRes.data) 
+        ? catRes.data 
+        : (catRes.data.categories || catRes.data.data || []);
+
+      setProducts(productData);
+      setFilteredProducts(productData);
+      setAllCategories(categoryData);
     } catch (error) {
+      console.error("Fetch error:", error);
       toast.error("Failed to sync inventory");
+      setProducts([]); // Fallback to empty array to prevent .filter crash
     } finally {
       setLoading(false);
     }
@@ -40,14 +53,12 @@ const ViewProducts = () => {
 
   // 2. Helper to find Parent Category Name
   const getParentCategoryName = (product) => {
-    if (!product || !allCategories.length) return "General";
+    if (!product || !allCategories || !Array.isArray(allCategories)) return "General";
     
-    // Get the ID of the sub-category attached to the product
     const subCatId = typeof product.category === 'object' 
       ? product.category?._id 
       : product.category;
 
-    // Find the main category that contains this sub-category ID
     const parent = allCategories.find(main => 
       main.subCategories?.some(sub => sub._id === subCatId)
     );
@@ -57,7 +68,8 @@ const ViewProducts = () => {
 
   // 3. Combined Filter and Search Logic
   useEffect(() => {
-    let result = products;
+    // SAFETY CHECK: Ensure products is an array before filtering
+    let result = Array.isArray(products) ? [...products] : [];
 
     // Filter by Parent Category
     if (activeFilter !== "All") {
@@ -70,7 +82,7 @@ const ViewProducts = () => {
     // Filter by Search Term
     if (searchTerm) {
       result = result.filter(p => 
-        p.name.toLowerCase().includes(searchTerm.toLowerCase())
+        (p.name || "").toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -159,30 +171,28 @@ const ViewProducts = () => {
           <Loader2 className="animate-spin text-amber-500" size={40} />
           <p className="text-slate-400 font-black text-[10px] uppercase tracking-widest">Syncing Database...</p>
         </div>
-      ) : filteredProducts.length === 0 ? (
+      ) : filteredProducts?.length === 0 ? (
         <div className="bg-white rounded-[3rem] p-32 text-center border-2 border-dashed border-slate-100">
            <Package className="mx-auto text-slate-100 mb-6" size={80} strokeWidth={1} />
            <p className="text-slate-400 font-bold text-xl tracking-tight">No products found in this department.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {filteredProducts.map((product) => (
+          {filteredProducts?.map((product) => (
             <div key={product._id} className="group bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/20 overflow-hidden hover:shadow-2xl hover:border-amber-100 transition-all duration-500">
               <div className="relative h-72 overflow-hidden bg-slate-50">
                 <img 
-                  src={product.image[0] || "https://via.placeholder.com/400"} 
+                  src={product.image?.[0] || "https://via.placeholder.com/400"} 
                   alt={product.name} 
                   className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" 
                 />
                 
-                {/* PARENT CATEGORY BADGE */}
                 <div className="absolute top-5 left-5">
                   <span className="bg-white/90 backdrop-blur-xl px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.1em] text-slate-900 shadow-lg border border-white">
                     {getParentCategoryName(product)}
                   </span>
                 </div>
 
-                {/* OVERLAY ACTIONS */}
                 <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-4">
                   <button onClick={() => setModalProduct(product)} className="p-4 bg-white rounded-2xl text-slate-900 hover:bg-amber-500 hover:text-white transition-all transform hover:-translate-y-1">
                     <Eye size={22} />
@@ -220,9 +230,9 @@ const ViewProducts = () => {
 
             <div className="md:w-1/2 bg-slate-50 flex items-center justify-center p-16">
                <img 
-                 src={modalProduct.image[0]} 
+                 src={modalProduct.image?.[0]} 
                  alt={modalProduct.name} 
-                 className="max-h-[500px] w-full object-contain rounded-3xl transition-transform duration-700" 
+                 className="max-h-[500px] w-full object-contain rounded-3xl" 
                />
             </div>
 
@@ -236,7 +246,7 @@ const ViewProducts = () => {
               <div className="space-y-8 mb-12">
                  <div className="h-[2px] bg-slate-100 w-24"></div>
                  <p className="text-slate-500 leading-relaxed font-medium text-lg italic">
-                   {modalProduct.description || "Sophisticated design meets unparalleled comfort in this curated seasonal piece."}
+                   {modalProduct.description || "Sophisticated design meets unparalleled comfort."}
                  </p>
                  
                  <div className="flex flex-wrap gap-3">
