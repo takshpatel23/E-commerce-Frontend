@@ -26,7 +26,7 @@ const ViewOrders = () => {
                 const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/orders`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
-                
+
                 // FIX 2: Ensure data is an array. 
                 // If your backend returns { orders: [...] }, use data.orders
                 const validatedData = Array.isArray(data) ? data : (data.orders || []);
@@ -166,10 +166,9 @@ const OrderRow = ({ order, onDetails }) => (
                 <p className="text-2xl font-black tracking-tighter">₹{order.total?.toLocaleString() || 0}</p>
             </div>
             <div className="flex items-center gap-4">
-                <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${
-                    order.status === 'Completed' ? 'bg-emerald-50 border-emerald-100 text-emerald-700' :
-                    order.status === 'Cancelled' ? 'bg-rose-50 border-rose-100 text-rose-700' : 'bg-slate-50 border-slate-200 text-slate-500'
-                }`}>
+                <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${order.status === 'Completed' ? 'bg-emerald-50 border-emerald-100 text-emerald-700' :
+                        order.status === 'Cancelled' ? 'bg-rose-50 border-rose-100 text-rose-700' : 'bg-slate-50 border-slate-200 text-slate-500'
+                    }`}>
                     {order.status}
                 </span>
                 <button
@@ -212,19 +211,46 @@ const DetailModal = ({ order, onClose, onUpdate }) => (
                 </div>
             </div>
             <div className="flex-grow p-10 md:p-16 overflow-y-auto text-left">
+                /* ... inside DetailModal component ... */
+
                 <h4 className="text-5xl font-black tracking-tighter uppercase italic mb-8">Manifest</h4>
                 <div className="space-y-4">
                     {order.items?.map((item, idx) => (
-                        <div key={idx} className="flex justify-between items-center py-4 border-b border-slate-100">
-                            <p className="font-bold text-slate-800 uppercase">{item.name} x{item.quantity}</p>
-                            <p className="font-black italic">₹{(item.price * item.quantity).toLocaleString()}</p>
+                        <div key={idx} className="flex justify-between items-center py-4 border-b border-slate-100 group">
+                            <div className="flex items-center gap-6 text-left">
+                                {/* --- PRODUCT IMAGE --- */}
+                                <div className="w-16 h-16 bg-slate-100 rounded-lg overflow-hidden flex-shrink-0 border border-slate-200">
+                                    {item.image ? (
+                                        <img
+                                            src={item.image}
+                                            alt={item.name}
+                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center text-slate-300">
+                                            <Package size={20} />
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <p className="font-bold text-slate-800 uppercase leading-tight">{item.name}</p>
+                                    <p className="text-[10px] font-black text-slate-400 tracking-widest mt-1">
+                                        UNIT PRICE: ₹{item.price?.toLocaleString()} — QTY: {item.quantity}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="text-right">
+                                <p className="font-black italic text-lg text-slate-900">
+                                    ₹{(item.price * item.quantity).toLocaleString()}
+                                </p>
+                            </div>
                         </div>
                     ))}
                 </div>
-                <div className="mt-16 pt-8 border-t-2 border-slate-950 flex justify-between items-center">
-                    <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em]">Total Valuation</p>
-                    <p className="text-5xl font-black tracking-tighter italic">₹{order.total?.toLocaleString()}</p>
-                </div>
+
+/* ... rest of the component ... */
             </div>
         </div>
     </div>
