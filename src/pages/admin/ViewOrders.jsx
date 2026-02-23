@@ -26,7 +26,7 @@ const ViewOrders = () => {
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const { data } = await axios.get("http://localhost:5000/api/orders", {
+                const { data } = await axios.get("${import.meta.env.VITE_API_URL}/api/orders", {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setOrders(data);
@@ -50,7 +50,7 @@ const ViewOrders = () => {
     });
     const updateStatus = async (orderId, status) => {
         try {
-            await axios.put(`http://localhost:5000/api/orders/${orderId}/status`, { status }, {
+            await axios.put(`${import.meta.env.VITE_API_URL}/api/orders/${orderId}/status`, { status }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setOrders(prev => prev.map(o => o._id === orderId ? { ...o, status } : o));

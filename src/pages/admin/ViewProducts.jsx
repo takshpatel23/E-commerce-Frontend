@@ -21,8 +21,8 @@ const ViewProducts = () => {
     try {
       setLoading(true);
       const [prodRes, catRes] = await Promise.all([
-        axios.get("http://localhost:5000/api/products"),
-        axios.get("http://localhost:5000/api/categories")
+        axios.get("${import.meta.env.VITE_API_URL}/api/products"),
+        axios.get("${import.meta.env.VITE_API_URL}/api/categories")
       ]);
       setProducts(prodRes.data);
       setFilteredProducts(prodRes.data);
@@ -85,7 +85,7 @@ const ViewProducts = () => {
           <button
             onClick={async () => {
               try {
-                await axios.delete(`http://localhost:5000/api/products/${id}`, {
+                await axios.delete(`${import.meta.env.VITE_API_URL}/api/products/${id}`, {
                   headers: { Authorization: `Bearer ${token}` },
                 });
                 toast.success("Item removed");

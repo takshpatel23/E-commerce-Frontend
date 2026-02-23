@@ -32,13 +32,13 @@ const Profile = () => {
     const fetchData = async () => {
       try {
         const headers = { Authorization: `Bearer ${token}` };
-        const userRes = await axios.get("http://localhost:5000/api/users/profile", { headers });
+        const userRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/users/profile`, { headers });
         setUserData(userRes.data);
 
-        const orderRes = await axios.get("http://localhost:5000/api/orders/myorders", { headers });
+        const orderRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/orders/myorders`, { headers });
         setOrders(orderRes.data);
 
-        const wishRes = await axios.get("http://localhost:5000/api/users/wishlist", { headers });
+        const wishRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/users/wishlist`, { headers });
         setWishlist(wishRes.data || []);
       } catch (err) { showToast("Archive Access Denied", "error"); }
     };
@@ -77,7 +77,7 @@ const Profile = () => {
       }
 
       await axios.put(
-        "http://localhost:5000/api/users/profile",
+        `${import.meta.env.VITE_API_URL}/api/users/profile`,
         formData,
         {
           headers: {
@@ -99,7 +99,7 @@ const Profile = () => {
 
   const removeFromWishlist = async (productId) => {
     try {
-      await axios.put(`http://localhost:5000/api/users/wishlist/${productId}`, {}, {
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/users/wishlist/${productId}`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setWishlist(wishlist.filter(item => item._id !== productId));
@@ -126,7 +126,7 @@ const Profile = () => {
               {/* PORTRAIT UPLOAD */}
               <div className="w-44 h-44 rounded-[4rem] overflow-hidden bg-slate-100 border-4 border-white shadow-[0_30px_60px_-15px_rgba(0,0,0,0.2)] relative z-10">
                 <img
-                  src={preview || (userData.profileImage ? `http://localhost:5000${userData.profileImage}` : "https://via.placeholder.com/150")}
+                  src={preview || (userData.profileImage ? `${import.meta.env.VITE_API_URL}${userData.profileImage}` : "https://via.placeholder.com/150")}
                   className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                   alt="Member Portrait"
                 />

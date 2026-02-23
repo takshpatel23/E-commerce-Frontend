@@ -38,7 +38,7 @@ const ProductDetail = () => {
 
     const fetchProduct = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/products/${id}`);
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/products/${id}`);
         setProduct(res.data);
 
         if (res.data.image && res.data.image.length > 0) {
@@ -46,7 +46,7 @@ const ProductDetail = () => {
         }
 
         if (token) {
-          const userRes = await axios.get("http://localhost:5000/api/users/profile", {
+          const userRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/users/profile`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           setIsWishlisted(userRes.data.wishlist.includes(id));
@@ -67,7 +67,7 @@ const ProductDetail = () => {
     setWishlistLoading(true);
     try {
       const res = await axios.put(
-        `http://localhost:5000/api/users/wishlist/${id}`,
+        `${import.meta.env.VITE_API_URL}/api/users/wishlist/${id}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );

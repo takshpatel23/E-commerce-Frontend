@@ -22,7 +22,7 @@ const Product = () => {
 
     const fetchProducts = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/products");
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/products`);
         setProducts(res.data);
       } catch (err) {
         setError("Our collection is temporarily unavailable. Please try again later.");
@@ -33,7 +33,7 @@ const Product = () => {
 
     const fetchCategories = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/categories");
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/categories`);
         setCategories(res.data); // structured parent -> subCategories
       } catch (err) {
         console.log("Error fetching categories:", err);

@@ -32,9 +32,9 @@ const Dashboard = () => {
       try {
         const headers = { Authorization: `Bearer ${token}` };
         const [prodRes, userRes, orderRes] = await Promise.all([
-          axios.get("http://localhost:5000/api/products", { headers }),
-          axios.get("http://localhost:5000/api/users/data", { headers }),
-          axios.get("http://localhost:5000/api/orders", { headers })
+          axios.get("${import.meta.env.VITE_API_URL}/api/products", { headers }),
+          axios.get("${import.meta.env.VITE_API_URL}/api/users/data", { headers }),
+          axios.get("${import.meta.env.VITE_API_URL}/api/orders", { headers })
         ]);
         setProducts(prodRes.data);
         setUsers(userRes.data);

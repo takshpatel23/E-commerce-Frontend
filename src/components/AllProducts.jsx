@@ -17,7 +17,7 @@ const AllProducts = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/products");
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/products`);
         setProducts(res.data);
       } catch (err) {
         console.error("Fetch Error:", err);
@@ -30,7 +30,7 @@ const AllProducts = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/categories");
+        const res = await axios.get("${import.meta.env.VITE_API_URL}/api/categories");
         setCategories(res.data);
       } catch (err) {
         console.error("Fetch Categories Error:", err);

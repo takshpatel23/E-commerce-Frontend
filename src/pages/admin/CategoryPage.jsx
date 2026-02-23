@@ -36,7 +36,7 @@ const CategoryPage = () => {
   const fetchCategories = async () => {
     try {
       setFetching(true);
-      const { data } = await axios.get("http://localhost:5000/api/categories");
+      const { data } = await axios.get("${import.meta.env.VITE_API_URL}/api/categories");
       setStructuredCategories(data);
       
       // Filter out any category that has a parent for the dropdown selection
@@ -72,7 +72,7 @@ const CategoryPage = () => {
         parent: formData.parent === "" ? null : formData.parent
       };
 
-      await axios.post("http://localhost:5000/api/categories", dataToSubmit, {
+      await axios.post("${import.meta.env.VITE_API_URL}/api/categories", dataToSubmit, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -89,7 +89,7 @@ const CategoryPage = () => {
   const deleteCategory = async (id) => {
     if(!window.confirm("CRITICAL: Deleting a parent category will wipe all sub-categories and linked products. Proceed?")) return;
     try {
-        await axios.delete(`http://localhost:5000/api/categories/${id}`, {
+        await axios.delete(`${import.meta.env.VITE_API_URL}/api/categories/${id}`, {
             headers: { Authorization: `Bearer ${token}` },
         });
         toast.success("Entity Purged");

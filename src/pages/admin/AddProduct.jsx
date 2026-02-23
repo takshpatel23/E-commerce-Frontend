@@ -39,7 +39,7 @@ const AddProduct = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const { data } = await axios.get("http://localhost:5000/api/categories");
+        const { data } = await axios.get("${import.meta.env.VITE_API_URL}/api/categories");
         setAllCategories(data);
       } catch {
         toast.error("Failed to load categories");
@@ -52,7 +52,7 @@ const AddProduct = () => {
   useEffect(() => {
     if (productId && allCategories.length > 0) {
       axios
-        .get(`http://localhost:5000/api/products/${productId}`)
+        .get(`${import.meta.env.VITE_API_URL}/api/products/${productId}`)
         .then((res) => {
           const product = res.data;
           const catId = product.category?._id || product.category;
@@ -152,10 +152,10 @@ const getDisplayCategory = () => {
       };
 
       if (productId) {
-        await axios.put(`http://localhost:5000/api/products/${productId}`, payload, config);
+        await axios.put(`${import.meta.env.VITE_API_URL}/api/products/${productId}`, payload, config);
         toast.success("Updated ✨");
       } else {
-        await axios.post("http://localhost:5000/api/products", payload, config);
+        await axios.post("${import.meta.env.VITE_API_URL}/api/products", payload, config);
         toast.success("Published ✨");
       }
       setTimeout(() => navigate("/admin/products"), 1500);

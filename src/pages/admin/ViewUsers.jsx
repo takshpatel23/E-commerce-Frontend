@@ -11,7 +11,7 @@ const ViewUsers = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:5000/api/users/data", {
+      const res = await axios.get("${import.meta.env.VITE_API_URL}/api/users/data", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUsers(res.data);
@@ -63,7 +63,7 @@ const ViewUsers = () => {
                     <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-inner bg-slate-100">
                       {user.profileImage ? (
                         <img
-                          src={`http://localhost:5000${user.profileImage}`}
+                          src={`${import.meta.env.VITE_API_URL}${user.profileImage}`}
                           alt={user.name}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                         />
@@ -123,7 +123,7 @@ const ViewUsers = () => {
               
               <div className="w-40 h-40 rounded-3xl overflow-hidden border-4 border-slate-800 shadow-2xl mb-6 ring-4 ring-amber-500/20">
                 <img
-                  src={modalUser.profileImage ? `http://localhost:5000${modalUser.profileImage}` : "https://via.placeholder.com/300"}
+                  src={modalUser.profileImage ? `${import.meta.env.VITE_API_URL}${modalUser.profileImage}` : "https://via.placeholder.com/300"}
                   alt={modalUser.name}
                   className="w-full h-full object-cover"
                 />
