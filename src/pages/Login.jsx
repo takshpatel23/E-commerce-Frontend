@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { ArrowRight, Lock, Mail, Loader2 } from "lucide-react";
+import { ArrowRight, Lock, Mail, Loader2, ChevronLeft } from "lucide-react";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -43,9 +43,17 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex bg-white font-sans">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-white font-sans">
       
-      {/* LEFT SIDE: Visual Brand Story */}
+      {/* MOBILE HEADER: Minimal logo for mobile users */}
+      <div className="lg:hidden flex items-center justify-between p-6">
+        <Link to="/" className="text-sm font-black tracking-[0.3em] uppercase">The Archive</Link>
+        <Link to="/" className="text-slate-400 hover:text-slate-950 transition-colors">
+          <ChevronLeft size={20} />
+        </Link>
+      </div>
+
+      {/* LEFT SIDE: Visual Brand Story (Hidden on small mobile, shown on large tablets/desktop) */}
       <div className="hidden lg:flex lg:w-1/2 relative bg-slate-900 overflow-hidden">
         <img 
           src="https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?auto=format&fit=crop&q=80" 
@@ -58,7 +66,7 @@ const Login = () => {
             <h1 className="text-6xl font-black tracking-tighter leading-none mb-6 italic font-light">
               Welcome <br /> Back.
             </h1>
-            <p className="text-slate-300 font-light leading-relaxed tracking-wide">
+            <p className="text-slate-300 font-light leading-relaxed tracking-wide text-lg">
               Access your personal collection and curated selections.
             </p>
           </div>
@@ -69,32 +77,32 @@ const Login = () => {
       </div>
 
       {/* RIGHT SIDE: Minimalist Entry Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 md:p-16 lg:p-24">
-        <div className="w-full max-w-sm space-y-12">
+      <div className="flex-grow flex items-center justify-center p-6 sm:p-12 md:p-16 lg:p-24">
+        <div className="w-full max-w-sm space-y-10 md:space-y-12">
           
-          <div className="space-y-4">
-            <span className="text-amber-600 text-[10px] font-black uppercase tracking-[0.4em]">Secure Access</span>
-            <h2 className="text-4xl font-black text-slate-950 tracking-tighter uppercase">Identify Yourself</h2>
+          <div className="space-y-3 md:space-y-4">
+            <span className="text-amber-600 text-[9px] md:text-[10px] font-black uppercase tracking-[0.4em]">Secure Access</span>
+            <h2 className="text-3xl md:text-4xl font-black text-slate-950 tracking-tighter uppercase leading-none">Identify Yourself</h2>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-8">
             {error && (
-              <div className="bg-red-50 text-red-500 p-4 rounded-xl text-xs font-bold uppercase tracking-widest animate-in fade-in slide-in-from-top-2">
+              <div className="bg-red-50 text-red-600 p-4 rounded-xl text-[10px] font-bold uppercase tracking-widest border border-red-100">
                 {error}
               </div>
             )}
 
             <div className="space-y-6">
               {/* Email Input */}
-              <div className="group relative border-b border-slate-200 focus-within:border-slate-950 transition-all py-2">
+              <div className="group relative border-b border-slate-200 focus-within:border-slate-950 transition-all py-1 md:py-2">
                 <label className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 group-focus-within:text-amber-600">Email Address</label>
                 <div className="flex items-center gap-3">
-                  <Mail size={16} className="text-slate-300" />
+                  <Mail size={16} className="text-slate-300 group-focus-within:text-slate-950 transition-colors" />
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full py-2 bg-transparent text-slate-950 font-bold placeholder:text-slate-200 placeholder:font-light focus:outline-none"
+                    className="w-full py-2 bg-transparent text-slate-950 font-bold text-sm md:text-base placeholder:text-slate-200 placeholder:font-light focus:outline-none"
                     placeholder="name@example.com"
                     required
                   />
@@ -102,15 +110,15 @@ const Login = () => {
               </div>
 
               {/* Password Input */}
-              <div className="group relative border-b border-slate-200 focus-within:border-slate-950 transition-all py-2">
+              <div className="group relative border-b border-slate-200 focus-within:border-slate-950 transition-all py-1 md:py-2">
                 <label className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 group-focus-within:text-amber-600">Private Key</label>
                 <div className="flex items-center gap-3">
-                  <Lock size={16} className="text-slate-300" />
+                  <Lock size={16} className="text-slate-300 group-focus-within:text-slate-950 transition-colors" />
                   <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full py-2 bg-transparent text-slate-950 font-bold placeholder:text-slate-200 placeholder:font-light focus:outline-none"
+                    className="w-full py-2 bg-transparent text-slate-950 font-bold text-sm md:text-base placeholder:text-slate-200 placeholder:font-light focus:outline-none"
                     placeholder="••••••••"
                     required
                   />
@@ -121,7 +129,7 @@ const Login = () => {
             <button
               type="submit"
               disabled={loading}
-              className="group w-full bg-slate-950 text-white py-5 rounded-2xl text-[11px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:bg-amber-600 transition-all duration-500 shadow-2xl shadow-slate-200"
+              className="group w-full bg-slate-950 text-white py-4 md:py-5 rounded-xl md:rounded-2xl text-[10px] md:text-[11px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:bg-amber-600 transition-all duration-500 shadow-xl active:scale-95 disabled:opacity-70"
             >
               {loading ? (
                 <Loader2 className="animate-spin" size={18} />
@@ -133,13 +141,13 @@ const Login = () => {
             </button>
           </form>
 
-          <div className="pt-8 border-t border-slate-100 flex flex-col items-center gap-4">
-            <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">
+          <div className="pt-8 border-t border-slate-100 flex flex-col items-center gap-3 md:gap-4">
+            <p className="text-slate-400 text-[9px] md:text-[10px] font-black uppercase tracking-widest">
               New to the archive?
             </p>
             <Link
               to="/signup"
-              className="text-slate-950 font-black uppercase tracking-widest text-[11px] hover:text-amber-600 transition-colors border-b-2 border-slate-950 hover:border-amber-600 pb-1"
+              className="text-slate-950 font-black uppercase tracking-widest text-[10px] md:text-[11px] hover:text-amber-600 transition-colors border-b-2 border-slate-950 hover:border-amber-600 pb-1"
             >
               Request Membership
             </Link>

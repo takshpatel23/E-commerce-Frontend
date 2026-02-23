@@ -9,44 +9,44 @@ const About = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white font-sans selection:bg-amber-100">
+    <div className="min-h-screen bg-white font-sans selection:bg-amber-100 flex flex-col">
       <Navbar />
 
       <main className="flex-grow">
-        {/* HERO SECTION - Minimalist & Bold */}
-        <section className="pt-40 pb-20 px-6">
+        {/* HERO SECTION */}
+        <section className="pt-32 md:pt-40 pb-12 md:pb-20 px-6">
           <div className="max-w-7xl mx-auto text-center">
-            <span className="text-amber-600 text-[10px] font-black uppercase tracking-[0.5em] mb-6 block">
+            <span className="text-amber-600 text-[9px] md:text-[10px] font-black uppercase tracking-[0.4em] md:tracking-[0.5em] mb-4 md:mb-6 block">
               Established 2019
             </span>
-            <h1 className="text-6xl md:text-8xl font-black text-slate-950 tracking-tighter leading-[0.9]">
+            <h1 className="text-4xl sm:text-6xl md:text-8xl font-black text-slate-950 tracking-tighter leading-[1] md:leading-[0.9]">
               Philosophy & <br />
               <span className="text-slate-200 italic font-light">Heritage</span>
             </h1>
           </div>
         </section>
 
-        {/* IMAGE + STORY - Asymmetric Layout */}
-        <section className="max-w-7xl mx-auto py-24 px-6">
-          <div className="grid md:grid-cols-12 gap-16 items-center">
+        {/* IMAGE + STORY */}
+        <section className="max-w-7xl mx-auto py-12 md:py-24 px-6">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-16 items-center">
             
-            {/* Image with Decorative Element */}
-            <div className="md:col-span-7 relative group">
-              <div className="absolute -inset-4 border border-slate-100 rounded-[3rem] -z-10 transition-transform group-hover:scale-105 duration-700"></div>
+            {/* Image Container */}
+            <div className="md:col-span-7 relative group order-2 md:order-1">
+              <div className="hidden md:block absolute -inset-4 border border-slate-100 rounded-[3rem] -z-10 transition-transform group-hover:scale-105 duration-700"></div>
               <img
                 src="https://images.unsplash.com/photo-1521334884684-d80222895322"
                 alt="Our Atelier"
-                className="rounded-[2.5rem] w-full h-[600px] object-cover shadow-2xl grayscale hover:grayscale-0 transition-all duration-[1.5s]"
+                className="rounded-3xl md:rounded-[2.5rem] w-full h-[400px] md:h-[600px] object-cover shadow-xl md:shadow-2xl md:grayscale hover:grayscale-0 transition-all duration-[1.5s]"
               />
             </div>
 
             {/* Content */}
-            <div className="md:col-span-5 space-y-8">
-              <Quote size={40} className="text-amber-600 opacity-20" />
-              <h2 className="text-4xl font-black text-slate-950 tracking-tight leading-none">
+            <div className="md:col-span-5 space-y-6 md:space-y-8 order-1 md:order-2">
+              <Quote size={32} className="text-amber-600 opacity-20 md:w-10" />
+              <h2 className="text-3xl md:text-4xl font-black text-slate-950 tracking-tight leading-none">
                 DEFINING THE <br /> MODERN CANON.
               </h2>
-              <div className="space-y-6 text-slate-500 font-light leading-relaxed text-lg">
+              <div className="space-y-4 md:space-y-6 text-slate-500 font-light leading-relaxed text-base md:text-lg">
                 <p>
                   Founded with a singular vision, our store began as a small atelier 
                   dedicated to the art of tailoring. We believed that fashion shouldn't 
@@ -57,9 +57,9 @@ const About = () => {
                   that values substance over trends and quality over quantity.
                 </p>
               </div>
-              <div className="pt-6">
-                <div className="h-[1px] w-20 bg-slate-950"></div>
-                <p className="mt-4 text-[10px] font-black uppercase tracking-widest text-slate-950">
+              <div className="pt-4 md:pt-6">
+                <div className="h-[1px] w-16 md:w-20 bg-slate-950"></div>
+                <p className="mt-4 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-950">
                   Director's Note
                 </p>
               </div>
@@ -67,26 +67,26 @@ const About = () => {
           </div>
         </section>
 
-        {/* STATS SECTION - Sophisticated Monochrome */}
-        <section className="bg-slate-950 py-24 px-6">
+        {/* STATS SECTION */}
+        <section className="bg-slate-950 py-16 md:py-24 px-6">
           <div className="max-w-7xl mx-auto">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 text-center">
               <StatItem number="10k" label="Pieces Curated" />
               <StatItem number="500+" label="Global Partners" />
-              <StatItem number="05" label="Years of Heritage" />
-              <StatItem number="24/7" label="Concierge Support" />
+              <StatItem number="05" label="Years Experience" />
+              <StatItem number="24/7" label="Concierge" />
             </div>
           </div>
         </section>
 
-        {/* WHY CHOOSE US - Luxury Values */}
-        <section className="max-w-7xl mx-auto py-32 px-6">
-          <div className="text-center mb-20">
-             <h2 className="text-[11px] font-black uppercase tracking-[0.4em] text-amber-600 mb-4">Core Values</h2>
-             <p className="text-4xl font-black text-slate-950 tracking-tighter">The Pillars of Our Craft</p>
+        {/* WHY CHOOSE US */}
+        <section className="max-w-7xl mx-auto py-20 md:py-32 px-6">
+          <div className="text-center mb-12 md:mb-20">
+             <h2 className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.4em] text-amber-600 mb-4">Core Values</h2>
+             <p className="text-3xl md:text-4xl font-black text-slate-950 tracking-tighter">The Pillars of Our Craft</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-px bg-slate-100 border border-slate-100 rounded-[3rem] overflow-hidden">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-slate-100 border border-slate-100 rounded-[2rem] md:rounded-[3rem] overflow-hidden">
             <ValueCard 
               icon={<Sparkles size={28} strokeWidth={1} />}
               title="Artisanal Quality"
@@ -106,24 +106,24 @@ const About = () => {
         </section>
 
         {/* NEWSLETTER/CTA */}
-        <section className="pb-32 px-6">
-            <div className="max-w-5xl mx-auto bg-amber-600 rounded-[3rem] p-12 md:p-20 text-center text-white relative overflow-hidden">
+        <section className="pb-20 md:pb-32 px-4 md:px-6">
+            <div className="max-w-5xl mx-auto bg-amber-600 rounded-[2rem] md:rounded-[3rem] p-10 md:p-20 text-center text-white relative overflow-hidden">
                 <div className="relative z-10">
-                    <h2 className="text-4xl md:text-5xl font-black tracking-tighter mb-6">Join the Inner Circle</h2>
-                    <p className="text-amber-100 font-light mb-10 max-w-md mx-auto italic">Receive early access to seasonal archives and exclusive invitations.</p>
-                    <div className="flex flex-col md:flex-row gap-4 justify-center">
+                    <h2 className="text-3xl md:text-5xl font-black tracking-tighter mb-4 md:mb-6">Join the Inner Circle</h2>
+                    <p className="text-amber-100 font-light mb-8 md:mb-10 max-w-md mx-auto italic text-sm md:text-base">Receive early access to seasonal archives and exclusive invitations.</p>
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <input 
                             type="email" 
                             placeholder="Email Address" 
-                            className="bg-white/10 border border-white/20 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:bg-white/20 md:w-80 placeholder:text-white/50"
+                            className="bg-white/10 border border-white/20 rounded-xl md:rounded-2xl px-6 py-4 text-sm focus:outline-none focus:bg-white/20 w-full sm:w-80 placeholder:text-white/50"
                         />
-                        <button className="bg-white text-slate-950 px-10 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-slate-900 hover:text-white transition-all">
+                        <button className="bg-white text-slate-950 px-10 py-4 rounded-xl md:rounded-2xl text-[10px] md:text-[11px] font-black uppercase tracking-widest hover:bg-slate-900 hover:text-white transition-all active:scale-95">
                             Subscribe
                         </button>
                     </div>
                 </div>
                 {/* Decorative background text */}
-                <div className="absolute -bottom-10 -right-10 text-[15rem] font-black text-white opacity-5 select-none pointer-events-none">
+                <div className="absolute -bottom-6 md:-bottom-10 -right-6 md:-right-10 text-[8rem] md:text-[15rem] font-black text-white opacity-5 select-none pointer-events-none">
                     ARCHIVE
                 </div>
             </div>
@@ -135,20 +135,18 @@ const About = () => {
   );
 };
 
-/* --- Sub-components for cleaner structure --- */
-
 const StatItem = ({ number, label }) => (
-  <div className="space-y-2">
-    <h3 className="text-5xl font-black text-white tracking-tighter">{number}</h3>
-    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em]">{label}</p>
+  <div className="space-y-1 md:space-y-2">
+    <h3 className="text-3xl md:text-5xl font-black text-white tracking-tighter">{number}</h3>
+    <p className="text-[8px] md:text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] md:tracking-[0.3em]">{label}</p>
   </div>
 );
 
 const ValueCard = ({ icon, title, desc }) => (
-  <div className="bg-white p-12 hover:bg-slate-50 transition-colors duration-500 flex flex-col items-center text-center">
-    <div className="text-amber-600 mb-8">{icon}</div>
-    <h3 className="text-lg font-black text-slate-950 uppercase tracking-widest mb-4">{title}</h3>
-    <p className="text-slate-500 font-light leading-relaxed text-sm">{desc}</p>
+  <div className="bg-white p-8 md:p-12 hover:bg-slate-50 transition-colors duration-500 flex flex-col items-center text-center">
+    <div className="text-amber-600 mb-6 md:mb-8">{icon}</div>
+    <h3 className="text-base md:text-lg font-black text-slate-950 uppercase tracking-widest mb-3 md:mb-4">{title}</h3>
+    <p className="text-slate-500 font-light leading-relaxed text-xs md:text-sm">{desc}</p>
   </div>
 );
 
