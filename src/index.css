@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Make sure html and body grow with content */
+html, body {
+  width: 100%;
+  min-height: 100%; /* full viewport at minimum */
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden; /* prevent horizontal scroll */
+  overflow-y: auto;   /* allow vertical scroll if content is bigger */
+}
+
+/* Optional: make body take flex layout for sticky footer */
+body {
+  display: flex;
+  flex-direction: column;
+}
