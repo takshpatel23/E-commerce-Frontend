@@ -8,10 +8,8 @@ import {
   Trash2, 
   Search,
   ArrowLeft,
-  Eye,
   LayoutGrid,
   ChevronRight,
-  Layers,
   Loader2,
   AlertCircle
 } from "lucide-react";
@@ -27,8 +25,8 @@ const CategoryPage = () => {
     parent: "",
   });
 
-  const [categories, setCategories] = useState([]); // Flat list for select
-  const [structuredCategories, setStructuredCategories] = useState([]); // Nested for display
+  const [categories, setCategories] = useState([]); 
+  const [structuredCategories, setStructuredCategories] = useState([]); 
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const token = localStorage.getItem("token");
@@ -36,14 +34,23 @@ const CategoryPage = () => {
   const fetchCategories = async () => {
     try {
       setFetching(true);
-      const { data } = await axios.get("${import.meta.env.VITE_API_URL}/api/categories");
-      setStructuredCategories(data);
+      // FIXED: Used backticks for template literal
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/categories`);
       
-      // Filter out any category that has a parent for the dropdown selection
-      const mainOnly = data.filter(cat => !cat.parent);
+      // DEFENSIVE: Ensure we are setting an array even if data is wrapped in an object
+      const categoryData = Array.isArray(data) ? data : (data.categories || []);
+      
+      setStructuredCategories(categoryData);
+      
+      // Filter for dropdown
+      const mainOnly = categoryData.filter(cat => !cat.parent);
       setCategories(mainOnly);
     } catch (error) {
+      console.error("Fetch Error:", error);
       toast.error("Systems Offline: Category Link Failed");
+      // Fallback to empty arrays to prevent .map crashes
+      setStructuredCategories([]);
+      setCategories([]);
     } finally {
       setFetching(false);
     }
@@ -72,7 +79,8 @@ const CategoryPage = () => {
         parent: formData.parent === "" ? null : formData.parent
       };
 
-      await axios.post("${import.meta.env.VITE_API_URL}/api/categories", dataToSubmit, {
+      // FIXED: Used backticks for template literal
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/categories`, dataToSubmit, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -87,7 +95,7 @@ const CategoryPage = () => {
   };
 
   const deleteCategory = async (id) => {
-    if(!window.confirm("CRITICAL: Deleting a parent category will wipe all sub-categories and linked products. Proceed?")) return;
+    if(!window.confirm("CRITICAL: Deletion will affect linked items. Proceed?")) return;
     try {
         await axios.delete(`${import.meta.env.VITE_API_URL}/api/categories/${id}`, {
             headers: { Authorization: `Bearer ${token}` },
@@ -99,7 +107,6 @@ const CategoryPage = () => {
     }
   };
 
-  // Helper component to prevent empty src warning
   const SafeImage = ({ src, alt, className }) => {
     if (!src || src.trim() === "") {
       return (
@@ -115,8 +122,7 @@ const CategoryPage = () => {
     <div className="w-full max-w-7xl mx-auto p-4 lg:p-8 font-sans">
       <Toaster position="top-right" />
 
-      {/* HEADER AREA */}
-      <div className="flex items-center gap-6 mb-10">
+      <div className="flex items-center gap-6 mb-10 text-left">
         <button 
           onClick={() => navigate(-1)} 
           className="p-3 bg-white border border-slate-100 shadow-sm hover:bg-slate-900 hover:text-white rounded-2xl transition-all"
@@ -132,19 +138,15 @@ const CategoryPage = () => {
       </div>
 
       <div className="grid lg:grid-cols-12 gap-10">
-        
-        {/* FORM SECTION */}
-        <section className="lg:col-span-8 bg-white p-8 rounded-[3rem] border border-slate-100 shadow-2xl shadow-slate-200/40">
-          <div className="flex items-center justify-between mb-8">
-             <div className="flex items-center gap-3">
-                <div className="p-2 bg-slate-900 rounded-xl text-white">
-                  <Plus size={18} strokeWidth={3} />
-                </div>
-                <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Register Entity</h3>
-             </div>
+        <section className="lg:col-span-8 bg-white p-6 lg:p-8 rounded-[3rem] border border-slate-100 shadow-2xl shadow-slate-200/40">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="p-2 bg-slate-900 rounded-xl text-white">
+              <Plus size={18} strokeWidth={3} />
+            </div>
+            <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Register Entity</h3>
           </div>
           
-          <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-8">
+          <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-8 text-left">
             <div className="space-y-6">
               <div>
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1 mb-2 block">Category Label</label>
@@ -168,7 +170,7 @@ const CategoryPage = () => {
                   className="w-full p-4 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-amber-500 font-bold appearance-none cursor-pointer"
                 >
                   <option value="">Main Department (Root)</option>
-                  {categories.map(cat => (
+                  {Array.isArray(categories) && categories.map(cat => (
                     <option key={cat._id} value={cat._id}>Under {cat.name}</option>
                   ))}
                 </select>
@@ -179,7 +181,7 @@ const CategoryPage = () => {
                 <input
                   type="text"
                   name="image"
-                  placeholder="https://images.unsplash.com/..."
+                  placeholder="https://..."
                   value={formData.image}
                   onChange={handleChange}
                   className="w-full p-4 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-amber-500 font-bold transition-all outline-none"
@@ -192,7 +194,7 @@ const CategoryPage = () => {
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1 mb-2 block">Sector Narrative</label>
                 <textarea
                   name="description"
-                  placeholder="Define the scope of this category..."
+                  placeholder="Define the scope..."
                   value={formData.description}
                   onChange={handleChange}
                   rows="4"
@@ -224,22 +226,16 @@ const CategoryPage = () => {
           </form>
         </section>
 
-        {/* PREVIEW SECTION */}
-        <div className="lg:col-span-4 space-y-6">
+        <div className="lg:col-span-4 space-y-6 text-left">
           <div className="flex items-center justify-between px-2">
             <h3 className="text-[10px] font-black text-slate-900 uppercase tracking-[0.2em]">Holographic Preview</h3>
             <div className={`h-2 w-2 rounded-full ${formData.name ? 'bg-emerald-500 animate-pulse' : 'bg-slate-200'}`}></div>
           </div>
           
-          <div className="relative group w-full bg-white rounded-[2.5rem] overflow-hidden border border-slate-100 shadow-2xl shadow-slate-200/50">
+          <div className="relative group w-full bg-white rounded-[2.5rem] overflow-hidden border border-slate-100 shadow-2xl">
             <div className="aspect-[4/5] overflow-hidden bg-slate-50 relative">
-              <SafeImage 
-                src={formData.image} 
-                alt="Preview" 
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-              />
+              <SafeImage src={formData.image} alt="Preview" className="w-full h-full object-cover transition-transform duration-700" />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-80"></div>
-              
               <div className="absolute bottom-8 left-8 right-8">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="px-3 py-1 bg-amber-500 text-white text-[8px] font-black uppercase rounded-full">
@@ -250,25 +246,21 @@ const CategoryPage = () => {
                 <h4 className="text-white font-black text-3xl uppercase italic tracking-tighter truncate">
                   {formData.name || "Unnamed"}
                 </h4>
-                <p className="text-slate-300 text-xs font-medium line-clamp-2 mt-2 leading-relaxed italic">
-                  {formData.description || "Establish a narrative for this sector..."}
-                </p>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* TABLE SECTION */}
-      <div className="mt-16 space-y-6">
+      {/* TABLE */}
+      <div className="mt-16 space-y-6 text-left">
         <div className="flex items-center justify-between px-2">
           <h3 className="text-xs font-black text-slate-900 uppercase tracking-[0.2em] flex items-center gap-3">
             <LayoutGrid size={16} className="text-amber-500" /> Taxonomy Overview
           </h3>
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{structuredCategories.length} Departments Managed</span>
         </div>
 
-        <div className="bg-white rounded-[3rem] border border-slate-100 shadow-2xl shadow-slate-200/40 overflow-hidden">
+        <div className="bg-white rounded-[3rem] border border-slate-100 shadow-2xl overflow-hidden">
           {fetching ? (
             <div className="p-20 flex flex-col items-center justify-center gap-4">
                <Loader2 className="animate-spin text-slate-200" size={40} />
@@ -286,9 +278,8 @@ const CategoryPage = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
-                  {structuredCategories.map((main) => (
+                  {Array.isArray(structuredCategories) && structuredCategories.map((main) => (
                     <React.Fragment key={main._id}>
-                      {/* MAIN ROW */}
                       <tr className="group hover:bg-slate-50/50 transition-colors">
                         <td className="p-6">
                           <div className="flex items-center gap-5">
@@ -308,18 +299,13 @@ const CategoryPage = () => {
                           {main.isFeatured && <Star size={16} className="mx-auto fill-amber-400 text-amber-400" />}
                         </td>
                         <td className="p-6 text-right">
-                          <button 
-                            onClick={() => deleteCategory(main._id)} 
-                            className="p-3 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
-                          >
+                          <button onClick={() => deleteCategory(main._id)} className="p-3 text-slate-300 hover:text-rose-500 rounded-xl transition-all">
                             <Trash2 size={20} />
                           </button>
                         </td>
                       </tr>
-
-                      {/* SUB ROWS */}
                       {main.subCategories?.map((sub) => (
-                        <tr key={sub._id} className="group hover:bg-amber-50/30 transition-colors bg-slate-50/20">
+                        <tr key={sub._id} className="bg-slate-50/20">
                           <td className="p-4 pl-24">
                             <div className="flex items-center gap-4">
                                 <ChevronRight size={14} className="text-slate-300" />
@@ -346,13 +332,6 @@ const CategoryPage = () => {
                   ))}
                 </tbody>
               </table>
-              
-              {structuredCategories.length === 0 && !fetching && (
-                <div className="p-32 text-center">
-                  <Search size={48} className="mx-auto text-slate-100 mb-6" />
-                  <p className="text-slate-300 font-black uppercase text-xs tracking-[0.3em]">No Taxonomy Mapped</p>
-                </div>
-              )}
             </div>
           )}
         </div>

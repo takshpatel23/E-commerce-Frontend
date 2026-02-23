@@ -20,14 +20,14 @@ const AddProduct = () => {
   const productId = searchParams.get("id");
 
   // State for Categories
-  const [allCategories, setAllCategories] = useState([]); // The nested list from API
-  const [subCategories, setSubCategories] = useState([]);  // Filtered list for the second dropdown
-  const [selectedMainId, setSelectedMainId] = useState(""); // Track the "Men/Women/Kids" selection
+  const [allCategories, setAllCategories] = useState([]); 
+  const [subCategories, setSubCategories] = useState([]); 
+  const [selectedMainId, setSelectedMainId] = useState(""); 
 
   const [formData, setFormData] = useState({
     name: "",
     price: "",
-    category: "", // This will hold the Sub-Category ID
+    category: "", 
     image: [""],
     description: "",
     sizes: [{ size: "", quantity: 0 }],
@@ -39,9 +39,14 @@ const AddProduct = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const { data } = await axios.get("${import.meta.env.VITE_API_URL}/api/categories");
-        setAllCategories(data);
-      } catch {
+        // FIXED: Used backticks for the template literal
+        const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/categories`);
+        
+        // SAFETY: Extract array even if backend wraps it in an object
+        const categoriesArray = Array.isArray(data) ? data : (data.categories || data.data || []);
+        setAllCategories(categoriesArray);
+      } catch (err) {
+        console.error("Category fetch error:", err);
         toast.error("Failed to load categories");
       }
     };
@@ -50,21 +55,23 @@ const AddProduct = () => {
 
   // 2. Fetch product details if in Edit Mode
   useEffect(() => {
+    // Only run if we have a productId AND categories have finished loading
     if (productId && allCategories.length > 0) {
       axios
         .get(`${import.meta.env.VITE_API_URL}/api/products/${productId}`)
         .then((res) => {
           const product = res.data;
+          // Support both populated objects and raw IDs
           const catId = product.category?._id || product.category;
 
           // Find which parent this sub-category belongs to
           const parentObj = allCategories.find(main => 
-            main.subCategories.some(sub => sub._id === catId)
+            main.subCategories?.some(sub => sub._id === catId)
           );
 
           if (parentObj) {
             setSelectedMainId(parentObj._id);
-            setSubCategories(parentObj.subCategories);
+            setSubCategories(parentObj.subCategories || []);
           }
 
           setFormData({
@@ -83,16 +90,15 @@ const AddProduct = () => {
     }
   }, [productId, allCategories]);
 
-  // 3. Handle Main Category Change (Filtering)
+  // 3. Handle Main Category Change
   const handleMainCategoryChange = (e) => {
     const mainId = e.target.value;
     setSelectedMainId(mainId);
     
-    // Find subcategories for the selected main
     const selectedMain = allCategories.find(cat => cat._id === mainId);
     if (selectedMain) {
-      setSubCategories(selectedMain.subCategories);
-      setFormData({ ...formData, category: "" }); // Reset specific category
+      setSubCategories(selectedMain.subCategories || []);
+      setFormData(prev => ({ ...prev, category: "" })); 
     } else {
       setSubCategories([]);
     }
@@ -103,16 +109,11 @@ const AddProduct = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  // Helper for Preview
-  // Helper for Preview - Now shows the Main Department name
-const getDisplayCategory = () => {
-  if (!selectedMainId) return "Uncategorized";
-  
-  // Find the object in our main list that matches the selected ID
-  const foundMain = allCategories.find(cat => cat._id === selectedMainId);
-  
-  return foundMain ? foundMain.name : "Department";
-};
+  const getDisplayCategory = () => {
+    if (!selectedMainId) return "Uncategorized";
+    const foundMain = allCategories.find(cat => cat._id === selectedMainId);
+    return foundMain ? foundMain.name : "Department";
+  };
 
   const handleImageChange = (index, value) => {
     const updatedImages = [...formData.image];
@@ -121,6 +122,7 @@ const getDisplayCategory = () => {
   };
 
   const addImageField = () => setFormData({ ...formData, image: [...formData.image, ""] });
+  
   const removeImageField = (index) => {
     const updatedImages = formData.image.filter((_, i) => i !== index);
     setFormData({ ...formData, image: updatedImages.length ? updatedImages : [""] });
@@ -133,6 +135,7 @@ const getDisplayCategory = () => {
   };
 
   const addSize = () => setFormData({ ...formData, sizes: [...formData.sizes, { size: "", quantity: 0 }] });
+  
   const removeSize = (index) => {
     const newSizes = formData.sizes.filter((_, i) => i !== index);
     setFormData({ ...formData, sizes: newSizes.length ? newSizes : [{ size: "", quantity: 0 }] });
@@ -155,7 +158,7 @@ const getDisplayCategory = () => {
         await axios.put(`${import.meta.env.VITE_API_URL}/api/products/${productId}`, payload, config);
         toast.success("Updated ✨");
       } else {
-        await axios.post("${import.meta.env.VITE_API_URL}/api/products", payload, config);
+        await axios.post(`${import.meta.env.VITE_API_URL}/api/products`, payload, config);
         toast.success("Published ✨");
       }
       setTimeout(() => navigate("/admin/products"), 1500);
@@ -167,22 +170,22 @@ const getDisplayCategory = () => {
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto p-6 font-sans">
+    <div className="w-full max-w-6xl mx-auto p-4 lg:p-6 font-sans">
       <Toaster position="top-right" />
 
       <div className="flex items-center gap-4 mb-8">
         <button onClick={() => navigate(-1)} className="p-2 hover:bg-slate-100 rounded-full text-slate-600 transition-colors">
           <ArrowLeft size={24} />
         </button>
-        <div>
+        <div className="text-left">
            <h1 className="text-3xl font-bold text-slate-900">{productId ? "Edit Product" : "New Inventory"}</h1>
-           <p className="text-slate-400 text-sm">Fill in the details for your new collection item</p>
+           <p className="text-slate-400 text-sm">Fill in the details for your collection</p>
         </div>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 bg-white p-8 rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/50">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="lg:col-span-2 bg-white p-6 lg:p-8 rounded-[2rem] border border-slate-100 shadow-xl">
+          <form onSubmit={handleSubmit} className="space-y-6 text-left">
 
             {/* Product Name */}
             <div className="space-y-2">
@@ -199,7 +202,6 @@ const getDisplayCategory = () => {
 
             {/* Dual Category Dropdown */}
             <div className="grid md:grid-cols-2 gap-4">
-               {/* 1. Select Main Category */}
                <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Main Department</label>
                   <div className="relative">
@@ -209,15 +211,15 @@ const getDisplayCategory = () => {
                       className="w-full p-4 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-amber-500 font-medium appearance-none cursor-pointer"
                     >
                       <option value="">Choose Dept...</option>
-                      {allCategories.map((cat) => (
+                      {/* FIXED: Check if allCategories is an array before mapping */}
+                      {Array.isArray(allCategories) && allCategories.map((cat) => (
                         <option key={cat._id} value={cat._id}>{cat.name}</option>
                       ))}
                     </select>
-                    <Filter className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300" size={16}/>
+                    <Filter className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none" size={16}/>
                   </div>
                </div>
 
-               {/* 2. Select Sub Category */}
                <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Sub-Category</label>
                   <div className="relative">
@@ -230,11 +232,11 @@ const getDisplayCategory = () => {
                       required
                     >
                       <option value="">Select Sub...</option>
-                      {subCategories.map((sub) => (
+                      {Array.isArray(subCategories) && subCategories.map((sub) => (
                         <option key={sub._id} value={sub._id}>{sub.name}</option>
                       ))}
                     </select>
-                    <Layers className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300" size={16}/>
+                    <Layers className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none" size={16}/>
                   </div>
                </div>
             </div>
@@ -289,7 +291,7 @@ const getDisplayCategory = () => {
 
             {/* Sizes */}
             <div className="space-y-3">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Inventory Management (Sizes)</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Sizes</label>
               {formData.sizes.map((s, index) => (
                 <div key={index} className="flex gap-3 mt-2">
                   <input
@@ -326,11 +328,11 @@ const getDisplayCategory = () => {
 
         {/* LIVE PREVIEW COLUMN */}
         <div className="space-y-6">
-          <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-2">Storefront Preview</h3>
-          <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden sticky top-8">
+          <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-2 text-left">Storefront Preview</h3>
+          <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl overflow-hidden sticky top-8 text-left">
             <div className="h-72 bg-slate-50 relative group">
               {formData.image[0] ? (
-                <img src={formData.image[0]} alt="preview" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                <img src={formData.image[0]} alt="preview" className="w-full h-full object-cover" />
               ) : (
                 <div className="flex justify-center items-center h-full text-slate-200">
                   <ImageIcon size={64} strokeWidth={1} />
@@ -351,12 +353,12 @@ const getDisplayCategory = () => {
                 </p>
               </div>
               <p className="text-sm text-slate-400 line-clamp-2 italic leading-relaxed">
-                {formData.description || "The product description will render here. Choose a compelling narrative."}
+                {formData.description || "The product description will render here."}
               </p>
               
-              <div className="flex gap-2 pt-2 overflow-x-auto pb-1">
+              <div className="flex gap-2 pt-2 overflow-x-auto">
                  {formData.sizes.map((s, i) => (
-                    s.size && <span key={i} className="px-3 py-1 bg-slate-50 border border-slate-100 rounded-lg text-[10px] font-bold text-slate-500">{s.size} ({s.quantity})</span>
+                    s.size && <span key={i} className="px-3 py-1 bg-slate-50 border border-slate-100 rounded-lg text-[10px] font-bold text-slate-500 whitespace-nowrap">{s.size} ({s.quantity})</span>
                  ))}
               </div>
             </div>
