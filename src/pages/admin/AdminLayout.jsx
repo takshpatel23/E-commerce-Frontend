@@ -17,7 +17,8 @@ const AdminLayout = () => {
   // Safely parse user data
   const [user] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem("user") || "{}");
+      const savedUser = localStorage.getItem("user");
+      return savedUser ? JSON.parse(savedUser) : {};
     } catch {
       return {};
     }
@@ -26,36 +27,43 @@ const AdminLayout = () => {
 
   const showToast = (message, type = "success") => setToast({ show: true, message, type });
 
-  // --- FETCH LOGIC WITH ERROR BOUNDARIES ---
+  // --- FETCH LOGIC WITH SAFETY GUARDS ---
   const fetchPendingOrders = useCallback(async () => {
     if (!token) return;
     try {
-      const { data } = await axios.get("${import.meta.env.VITE_API_URL}/api/orders", {
+      // FIXED: Changed double quotes to backticks (`) for the URL
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/orders`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       
-      if (data && Array.isArray(data)) {
-        const pending = data.filter(order => order?.status?.toLowerCase() === "pending");
+      // SAFETY GUARD: Ensure 'data' is an array before filtering
+      // If backend wraps it in an object, we check for 'orders' or 'data' keys
+      const ordersArray = Array.isArray(data) 
+        ? data 
+        : (data?.orders || data?.data || []);
+
+      if (Array.isArray(ordersArray)) {
+        const pending = ordersArray.filter(order => order?.status?.toLowerCase() === "pending");
         setPendingOrders(pending);
         setHasUnread(pending.length > 0);
       }
     } catch (error) {
-      // Quietly handle Network Errors to prevent console spam
       if (!error.response) {
-        console.warn("Backend unreachable. Check if server is running on port 5000.");
+        console.warn("Backend unreachable. Check if server is running.");
       } else if (error.response.status === 401) {
-        handleLogout(); // Auto-logout if token is invalid
+        handleLogout(); 
       }
     }
   }, [token]);
 
   useEffect(() => {
+    // Check if user is authenticated and is an admin
     if (!token || user?.role !== "admin") {
       navigate("/login");
       return;
     }
     fetchPendingOrders();
-    const interval = setInterval(fetchPendingOrders, 30000); // 30s interval
+    const interval = setInterval(fetchPendingOrders, 30000); 
     return () => clearInterval(interval);
   }, [token, user?.role, navigate, fetchPendingOrders]);
 
@@ -99,7 +107,7 @@ const AdminLayout = () => {
               <span className="text-xl font-extrabold tracking-tight">Nexus<span className="text-amber-500">Admin</span></span>
             </div>
             <button onClick={() => setIsMobileMenuOpen(false)} className="lg:hidden p-2 text-slate-400">
-               <X size={20} />
+                <X size={20} />
             </button>
           </div>
 
@@ -115,11 +123,10 @@ const AdminLayout = () => {
           </nav>
 
           <div className="p-4 mt-auto">
-            {/* --- SAFE AVATAR RENDERING --- */}
             <div className="bg-slate-50 rounded-2xl p-4 flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 font-bold border border-amber-200">
+              <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 font-bold border border-amber-200 overflow-hidden">
                 {user?.image ? (
-                   <img src={user.image} alt="" className="w-full h-full rounded-full object-cover" />
+                   <img src={user.image} alt="" className="w-full h-full object-cover" />
                 ) : (
                    user?.name?.[0] || 'A'
                 )}
