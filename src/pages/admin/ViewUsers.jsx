@@ -123,22 +123,15 @@ const ViewUsers = () => {
                 <X size={24} />
               </button>
 
-              <div className="w-40 h-40 rounded-3xl overflow-hidden border-4 border-slate-800 shadow-2xl mb-6 ring-4 ring-amber-500/20">
-<img
-  src={
-    preview || 
-    (userData.profileImage 
-      ? (userData.profileImage.startsWith('http') 
-          ? userData.profileImage 
-          : `${import.meta.env.VITE_API_URL}${userData.profileImage}`) // Fixed path
-      : "https://ui-avatars.com/api/?name=User&background=f1f5f9&color=cbd5e1") // Added fallback
-  }
-  className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-  alt="Member Portrait"
-  // This ensures that if the URL is valid but the image file is missing, it still doesn't crash
-  onError={(e) => { e.target.src = "https://ui-avatars.com/api/?name=User&background=f1f5f9&color=cbd5e1"; }}
-/>
-              </div>
+             
+<div className="w-16 h-16 rounded-2xl overflow-hidden shadow-inner bg-slate-100">
+  <img
+    src={modalUser.profileImage?.startsWith('http') ? modalUser.profileImage : `${import.meta.env.VITE_API_URL}${modalUser.profileImage}`}
+    alt={modalUser.name}
+    className="w-full h-full object-cover"
+    onError={(e) => { e.target.src = "https://ui-avatars.com/api/?name=User"; }}
+  />
+</div>
               <h2 className="text-2xl font-bold text-white mb-1">{modalUser.name}</h2>
               <span className="px-3 py-1 bg-amber-500/10 text-amber-500 rounded-full text-xs font-bold uppercase tracking-widest border border-amber-500/20">
                 {modalUser.role}
