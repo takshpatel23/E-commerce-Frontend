@@ -211,8 +211,7 @@ const DetailModal = ({ order, onClose, onUpdate }) => (
                 </div>
             </div>
             <div className="flex-grow p-10 md:p-16 overflow-y-auto text-left">
-                /* ... inside DetailModal component ... */
-
+              
                 <h4 className="text-5xl font-black tracking-tighter uppercase italic mb-8">Manifest</h4>
                 <div className="space-y-4">
                     {order.items?.map((item, idx) => (
@@ -250,7 +249,7 @@ const DetailModal = ({ order, onClose, onUpdate }) => (
                     ))}
                 </div>
 
-/* ... rest of the component ... */
+
             </div>
         </div>
     </div>

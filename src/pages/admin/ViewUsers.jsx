@@ -11,7 +11,7 @@ const ViewUsers = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      
+
       // FIX 1: Use backticks (`) for template literals
       const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/users/data`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -21,7 +21,7 @@ const ViewUsers = () => {
       // If your API returns { users: [...] }, use res.data.users
       const userData = Array.isArray(res.data) ? res.data : (res.data.users || []);
       setUsers(userData);
-      
+
     } catch (err) {
       console.error("Fetch error:", err);
       // Ensure state remains an array on error to prevent .map() crash
@@ -99,13 +99,13 @@ const ViewUsers = () => {
                 </div>
 
                 <div className="hidden md:flex items-center gap-8 px-6">
-                   <div className="text-right">
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Location</p>
-                      <p className="text-sm text-slate-600 font-medium">{user.city || 'N/A'}, {user.country || 'N/A'}</p>
-                   </div>
-                   <button className="bg-slate-50 text-slate-400 group-hover:bg-amber-500 group-hover:text-white p-2.5 rounded-xl transition-all">
-                      <Briefcase size={20} />
-                   </button>
+                  <div className="text-right">
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Location</p>
+                    <p className="text-sm text-slate-600 font-medium">{user.city || 'N/A'}, {user.country || 'N/A'}</p>
+                  </div>
+                  <button className="bg-slate-50 text-slate-400 group-hover:bg-amber-500 group-hover:text-white p-2.5 rounded-xl transition-all">
+                    <Briefcase size={20} />
+                  </button>
                 </div>
               </div>
             ))}
@@ -117,17 +117,22 @@ const ViewUsers = () => {
       {modalUser && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white max-w-4xl w-full rounded-[2rem] shadow-2xl overflow-hidden flex flex-col md:flex-row">
-            
+
             <div className="md:w-1/3 bg-slate-900 p-10 text-center flex flex-col items-center justify-center relative">
               <button onClick={() => setModalUser(null)} className="absolute top-6 left-6 text-slate-400 hover:text-white md:hidden">
                 <X size={24} />
               </button>
-              
+
               <div className="w-40 h-40 rounded-3xl overflow-hidden border-4 border-slate-800 shadow-2xl mb-6 ring-4 ring-amber-500/20">
                 <img
-                  src={modalUser.profileImage ? `${import.meta.env.VITE_API_URL}${modalUser.profileImage}` : "https://via.placeholder.com/300"}
+                  src={
+                    modalUser.profileImage
+                      ? `${import.meta.env.VITE_API_URL}${modalUser.profileImage}`
+                      : "https://via.placeholder.com/300"
+                  }
                   alt={modalUser.name}
                   className="w-full h-full object-cover"
+                  onError={(e) => { e.target.src = "https://via.placeholder.com/300"; }}
                 />
               </div>
               <h2 className="text-2xl font-bold text-white mb-1">{modalUser.name}</h2>
@@ -145,7 +150,7 @@ const ViewUsers = () => {
                 <h3 className="text-sm font-bold text-amber-600 uppercase tracking-widest mb-6 flex items-center gap-2">
                   <Home size={16} /> Contact & Address
                 </h3>
-                
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-8 gap-x-12">
                   <InfoBlock label="Full Address" value={modalUser.address} />
                   <InfoBlock label="City" value={modalUser.city} />
