@@ -70,9 +70,10 @@ const ViewUsers = () => {
                     <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-inner bg-slate-100">
                       {user.profileImage ? (
                         <img
-                          src={`${import.meta.env.VITE_API_URL}${user.profileImage}`}
+                          src={user.profileImage?.startsWith('http') ? user.profileImage : `${import.meta.env.VITE_API_URL}${user.profileImage}`}
                           alt={user.name}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                          className="w-full h-full object-cover"
+                          onError={(e) => { e.target.src = "https://ui-avatars.com/api/?name=User"; }}
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-amber-600 font-bold text-xl uppercase">
@@ -123,15 +124,14 @@ const ViewUsers = () => {
                 <X size={24} />
               </button>
 
-             
-<div className="w-16 h-16 rounded-2xl overflow-hidden shadow-inner bg-slate-100">
-  <img
-    src={modalUser.profileImage?.startsWith('http') ? modalUser.profileImage : `${import.meta.env.VITE_API_URL}${modalUser.profileImage}`}
-    alt={modalUser.name}
-    className="w-full h-full object-cover"
-    onError={(e) => { e.target.src = "https://ui-avatars.com/api/?name=User"; }}
-  />
-</div>
+              <div className="w-40 h-40 rounded-3xl overflow-hidden border-4 border-slate-800 shadow-2xl mb-6 ring-4 ring-amber-500/20">
+                <img
+                  src={modalUser.profileImage?.startsWith('http') ? modalUser.profileImage : `${import.meta.env.VITE_API_URL}${modalUser.profileImage}`}
+                  alt={modalUser.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => { e.target.src = "https://ui-avatars.com/api/?name=User"; }}
+                />
+              </div>
               <h2 className="text-2xl font-bold text-white mb-1">{modalUser.name}</h2>
               <span className="px-3 py-1 bg-amber-500/10 text-amber-500 rounded-full text-xs font-bold uppercase tracking-widest border border-amber-500/20">
                 {modalUser.role}
