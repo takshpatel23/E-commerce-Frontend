@@ -18,22 +18,29 @@ const AllProducts = () => {
     const fetchProducts = async () => {
       try {
         const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/products`);
-        setProducts(res.data);
+        // If your backend wraps data in an object, use res.data.products or res.data.data
+        const data = Array.isArray(res.data) ? res.data : (res.data.products || res.data.data || []);
+        setProducts(data);
       } catch (err) {
         console.error("Fetch Error:", err);
+        setProducts([]); // Fallback to empty array on error
       }
     };
     fetchProducts();
   }, []);
 
-  // Fetch categories (structured: parent -> subCategories)
+  // Fetch categories
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await axios.get("${import.meta.env.VITE_API_URL}/api/categories");
-        setCategories(res.data);
+        // FIXED: Changed standard quotes to backticks for the template literal
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/categories`);
+        // Ensure we are saving an array
+        const data = Array.isArray(res.data) ? res.data : (res.data.categories || res.data.data || []);
+        setCategories(data);
       } catch (err) {
         console.error("Fetch Categories Error:", err);
+        setCategories([]);
       }
     };
     fetchCategories();
@@ -41,9 +48,10 @@ const AllProducts = () => {
 
   // Filter, search, and sort products
   useEffect(() => {
-    let filtered = [...products];
+    // Ensure products is an array before spreading
+    let filtered = Array.isArray(products) ? [...products] : [];
 
-    // Category filter: handle parent and subcategory
+    // Category filter
     if (selectedCategory !== "All") {
       filtered = filtered.filter((p) => {
         const parentCategoryName = p.category?.parent?.name || "";
@@ -66,7 +74,9 @@ const AllProducts = () => {
 
     // Search
     if (searchQuery.trim() !== "") {
-      filtered = filtered.filter((p) => (p.name || "").toLowerCase().includes(searchQuery.toLowerCase()));
+      filtered = filtered.filter((p) => 
+        (p.name || "").toLowerCase().includes(searchQuery.toLowerCase())
+      );
     }
 
     // Sorting
@@ -91,46 +101,44 @@ const AllProducts = () => {
             Our Collection
           </h2>
           <p className="text-slate-500 text-lg font-light max-w-2xl leading-relaxed">
-            A curated selection of pieces designed for the modern individual,
-            balancing timeless aesthetics with contemporary comfort.
+            A curated selection of pieces designed for the modern individual.
           </p>
         </div>
 
         {/* --- UTILITY BAR --- */}
         <div className="flex flex-col lg:flex-row justify-between items-end gap-12 mb-16 border-b border-slate-100 pb-10">
-
-          {/* --- CLASSIC DEPARTMENT NAVIGATION --- */}
           <div className="flex flex-wrap items-center gap-x-12 gap-y-6">
-            {/* All Pieces */}
             <button
               onClick={() => setSelectedCategory("All")}
-              className={`relative py-2 text-[11px] font-bold uppercase tracking-[0.3em] transition-all duration-500 group ${selectedCategory === "All" ? "text-slate-950" : "text-slate-400 hover:text-slate-600"
-                }`}
+              className={`relative py-2 text-[11px] font-bold uppercase tracking-[0.3em] transition-all duration-500 group ${
+                selectedCategory === "All" ? "text-slate-950" : "text-slate-400 hover:text-slate-600"
+              }`}
             >
               All
-              <span className={`absolute bottom-0 left-0 h-[1.5px] bg-amber-600 transition-all duration-500 ${selectedCategory === "All" ? "w-full" : "w-0 group-hover:w-full"
-                }`}></span>
+              <span className={`absolute bottom-0 left-0 h-[1.5px] bg-amber-600 transition-all duration-500 ${
+                selectedCategory === "All" ? "w-full" : "w-0 group-hover:w-full"
+              }`}></span>
             </button>
 
-            {/* Parent Categories */}
-            {categories.map((parent) => (
+            {/* FIXED: Added optional chaining (categories?.map) */}
+            {categories?.map((parent) => (
               <div key={parent._id} className="relative group">
                 <button
                   onClick={() => setSelectedCategory(parent.name)}
-                  className={`relative py-2 flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.3em] transition-all duration-500 ${selectedCategory === parent.name ? "text-slate-950" : "text-slate-400 hover:text-slate-600"
-                    }`}
+                  className={`relative py-2 flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.3em] transition-all duration-500 ${
+                    selectedCategory === parent.name ? "text-slate-950" : "text-slate-400 hover:text-slate-600"
+                  }`}
                 >
                   {parent.name}
-                  {parent.subCategories.length > 0 && (
+                  {parent.subCategories?.length > 0 && (
                     <ChevronDown size={12} className="opacity-30 group-hover:rotate-180 transition-transform duration-500" />
                   )}
-                  {/* Elegant Underline Indicator */}
-                  <span className={`absolute bottom-0 left-0 h-[1.5px] bg-amber-600 transition-all duration-500 ${selectedCategory === parent.name ? "w-full" : "w-0 group-hover:w-full"
-                    }`}></span>
+                  <span className={`absolute bottom-0 left-0 h-[1.5px] bg-amber-600 transition-all duration-500 ${
+                    selectedCategory === parent.name ? "w-full" : "w-0 group-hover:w-full"
+                  }`}></span>
                 </button>
 
-                {/* Minimalist Sub-Menu Dropdown */}
-                {parent.subCategories.length > 0 && (
+                {parent.subCategories?.length > 0 && (
                   <div className="absolute left-0 top-full pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible translate-y-2 group-hover:translate-y-0 transition-all duration-500 z-50">
                     <div className="bg-white border border-slate-100 p-6 min-w-[220px] shadow-[0_20px_40px_rgba(0,0,0,0.04)]">
                       <div className="flex flex-col gap-4">
@@ -138,8 +146,9 @@ const AllProducts = () => {
                           <button
                             key={sub._id}
                             onClick={() => setSelectedCategory(sub.name)}
-                            className={`text-[10px] uppercase tracking-[0.2em] text-left transition-all duration-300 hover:pl-2 ${selectedCategory === sub.name ? "text-amber-700 font-black" : "text-slate-400 hover:text-slate-950"
-                              }`}
+                            className={`text-[10px] uppercase tracking-[0.2em] text-left transition-all duration-300 hover:pl-2 ${
+                              selectedCategory === sub.name ? "text-amber-700 font-black" : "text-slate-400 hover:text-slate-950"
+                            }`}
                           >
                             {sub.name}
                           </button>
@@ -152,7 +161,6 @@ const AllProducts = () => {
             ))}
           </div>
 
-          {/* --- MINIMALIST SEARCH BAR --- */}
           <div className="relative w-full lg:w-80 group">
             <input
               type="text"
@@ -163,7 +171,6 @@ const AllProducts = () => {
             />
             <Search className="absolute right-0 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 group-focus-within:text-amber-600 transition-colors" />
           </div>
-
         </div>
 
         {/* --- FILTERS & SORT --- */}
@@ -208,7 +215,7 @@ const AllProducts = () => {
 
         {/* --- PRODUCTS GRID --- */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-16">
-          {displayProducts.length > 0 ? (
+          {displayProducts?.length > 0 ? (
             displayProducts.map((product) => <ProductCard key={product._id} product={product} />)
           ) : (
             <div className="col-span-full text-center py-40 border-2 border-dashed border-slate-100 rounded-[3rem]">
