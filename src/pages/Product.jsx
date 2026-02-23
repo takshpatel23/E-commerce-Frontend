@@ -23,7 +23,7 @@ const Product = () => {
     const fetchProducts = async () => {
       try {
         const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/products`);
-        setProducts(res.data);
+setProducts(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
         setError("Our collection is temporarily unavailable. Please try again later.");
       } finally {
@@ -218,10 +218,10 @@ const Product = () => {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-16">
-                  {filteredProducts.map((product) => (
+                  {Array.isArray(filteredProducts) && filteredProducts.map((product) => (
                     <ProductCard key={product._id} product={product} />
                   ))}
-                </div>
+                </div>  
               )}
             </div>
 
