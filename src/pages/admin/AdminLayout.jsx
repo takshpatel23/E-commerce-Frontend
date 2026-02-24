@@ -31,13 +31,10 @@ const AdminLayout = () => {
   const fetchPendingOrders = useCallback(async () => {
     if (!token) return;
     try {
-      // FIXED: Changed double quotes to backticks (`) for the URL
+   
       const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/orders`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      
-      // SAFETY GUARD: Ensure 'data' is an array before filtering
-      // If backend wraps it in an object, we check for 'orders' or 'data' keys
       const ordersArray = Array.isArray(data) 
         ? data 
         : (data?.orders || data?.data || []);
